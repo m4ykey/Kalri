@@ -38,7 +38,7 @@ public:
         double sampleRate = audioStream->getSampleRate();
         double phaseIncrement = (kFrequency * M_PI * 2) / sampleRate;
 
-        for (int i = 0; i < numFrames * 2; ++i) {
+        for (int i = 0; i < numFrames; ++i) {
             float sample = (float) (sin(mPhase) * kAmplitude);
 
             outputData[i * 2] = sample;

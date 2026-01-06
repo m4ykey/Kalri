@@ -30,8 +30,14 @@ private:
     double mFrequency = 440.0;
     const double kAmplitude = 0.2;
 
-    float a0 = 1.0f, a1 = 0.0f, a2 = 0.0f, b1 = 0.0f, b2 = 0.0f;
+    float a0 = 1.0f, a1 = 0.0f, a2 = 0.0f;
+    float b1 = 0.0f, b2 = 0.0f;
     BiquadState stateL, stateR;
+
+    float targetA0 = 1.0f, targetA1 = 0.0f, targetA2 = 0.0f;
+    float targetB1 = 0.0f, targetB2 = 0.0f;
+
+    const float kSmoothingFactor = 0.005f;
 };
 
 #endif

@@ -31,7 +31,6 @@ void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
     if (mStream == nullptr) return;
 
     mFrequency = (double) frequency;
-
     float sampleRate = (float)mStream->getSampleRate();
 
     float A = powf(10.0f, dbGain / 40.0f);
@@ -46,12 +45,12 @@ void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
     float a1_tmp = -2.0f * cosf(omega);
     float a2_tmp = 1.0f - alfa / A;
 
-    a0 = b0_tmp / a0_tmp;
-    a1 = b1_tmp / a0_tmp;
-    a2 = b2_tmp / a0_tmp;
+    targetA0 = b0_tmp / a0_tmp;
+    targetA1 = b1_tmp / a0_tmp;
+    targetA2 = b2_tmp / a0_tmp;
 
-    b1 = a1_tmp / a0_tmp;
-    b2 = a2_tmp / a0_tmp;
+    targetB1 = a1_tmp / a0_tmp;
+    targetB2 = a2_tmp / a0_tmp;
 }
 
 oboe::DataCallbackResult KalriEngine::onAudioReady(
@@ -64,6 +63,13 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
     double phaseIncrement = (mFrequency * 2.0 * M_PI) / (double)sampleRate;
 
     for (int i = 0; i < numFrames; ++i) {
+        a0 += (targetA0 - a0) * kSmoothingFactor;
+        a1 += (targetA1 - a1) * kSmoothingFactor;
+        a2 += (targetA2 - a2) * kSmoothingFactor;
+
+        b1 += (targetB1 - b1) * kSmoothingFactor;
+        b2 += (targetB2 - b2) * kSmoothingFactor;
+
         float sample = (float) (sin(mPhase) * kAmplitude);
         float outL = sample * a0 + stateL.z1;
         stateL.z1 = sample * a1 + stateL.z2 - outL * b1;

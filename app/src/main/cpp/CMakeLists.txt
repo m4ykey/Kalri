@@ -5,7 +5,9 @@ project("kalri")
 find_package(oboe REQUIRED CONFIG)
 
 add_library(${CMAKE_PROJECT_NAME} SHARED
-        native-lib.cpp)
+        native-lib.cpp
+        KalriEngine.cpp
+)
 
 find_library(log-lib, log)
 

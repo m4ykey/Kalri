@@ -11,6 +11,13 @@
 struct BiquadState {
     float z1 = 0.0f;
     float z2 = 0.0f;
+
+    float process(float input, float a0, float a1, float a2, float b1, float b2) {
+        float output = input * a0 + z1;
+        z1 = input * a1 + z2 - output * b1;
+        z2 = input * a2 - output * b2;
+        return output;
+    }
 };
 
 class KalriEngine : public oboe::AudioStreamDataCallback {

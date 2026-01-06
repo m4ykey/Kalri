@@ -31,26 +31,26 @@ void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
     if (mStream == nullptr) return;
 
     mFrequency = (double) frequency;
-    float sampleRate = (float)mStream->getSampleRate();
+    auto sampleRate = (float)mStream->getSampleRate();
 
     float A = powf(10.0f, dbGain / 40.0f);
-    float omega = (2.0f * M_PI * frequency) / sampleRate;
-    float alfa = sinf(omega) / (2.0f * Q);
+    double omega = (2.0f * M_PI * frequency) / static_cast<double>(sampleRate);
+    double alfa = sin(omega) / (2.0f * static_cast<double>(Q));
 
-    float b0_tmp = 1.0f + alfa * A;
-    float b1_tmp = -2.0f * cosf(omega);
-    float b2_tmp = 1.0f - alfa * A;
+    auto b0_tmp = static_cast<float>(1.0f + alfa * A);
+    auto b1_tmp = static_cast<float>(-2.0f * cos(omega));
+    auto b2_tmp = static_cast<float>(1.0f - alfa * A);
 
-    float a0_tmp = 1.0f + alfa / A;
-    float a1_tmp = -2.0f * cosf(omega);
-    float a2_tmp = 1.0f - alfa / A;
+    auto a0_tmp = static_cast<float>(1.0f + alfa / A);
+    auto a1_tmp = static_cast<float>(-2.0f * cos(omega));
+    auto a2_tmp = static_cast<float>(1.0f - alfa / A);
 
-    targetA0 = b0_tmp / a0_tmp;
-    targetA1 = b1_tmp / a0_tmp;
-    targetA2 = b2_tmp / a0_tmp;
+    targetA0 = static_cast<float>(b0_tmp / a0_tmp);
+    targetA1 = static_cast<float>(b1_tmp / a0_tmp);
+    targetA2 = static_cast<float>(b2_tmp / a0_tmp);
 
-    targetB1 = a1_tmp / a0_tmp;
-    targetB2 = a2_tmp / a0_tmp;
+    targetB1 = static_cast<float>(a1_tmp / a0_tmp);
+    targetB2 = static_cast<float>(a2_tmp / a0_tmp);
 }
 
 oboe::DataCallbackResult KalriEngine::onAudioReady(
@@ -58,7 +58,7 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         void *audioData,
         int32_t numFrames) {
 
-    float *outputData = static_cast<float *>(audioData);
+    auto *outputData = static_cast<float *>(audioData);
     double sampleRate = audioStream->getSampleRate();
     double phaseIncrement = (mFrequency * 2.0 * M_PI) / (double)sampleRate;
 
@@ -70,17 +70,10 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         b1 += (targetB1 - b1) * kSmoothingFactor;
         b2 += (targetB2 - b2) * kSmoothingFactor;
 
-        float sample = (float) (sin(mPhase) * kAmplitude);
-        float outL = sample * a0 + stateL.z1;
-        stateL.z1 = sample * a1 + stateL.z2 - outL * b1;
-        stateL.z2 = sample * a2 - outL * b2;
+        float rawSample = 0.0f;
 
-        float outR = sample * a0 + stateR.z1;
-        stateR.z1 = sample * a1 + stateR.z2 - outR * b1;
-        stateR.z2 = sample * a2 - outR * b2;
-
-        outputData[i * 2] = outL;
-        outputData[i * 2 + 1] = outR;
+        outputData[i * 2] = stateL.process(rawSample, a0, a1, a2, b1, b2);
+        outputData[i * 2 + 1] = stateR.process(rawSample, a0, a1, a2, b1, b2);
 
         mPhase += phaseIncrement;
         if (mPhase >= M_PI * 2) mPhase -= M_PI * 2;

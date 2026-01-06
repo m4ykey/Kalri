@@ -29,6 +29,9 @@ void KalriEngine::stop() {
 
 void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
     if (mStream == nullptr) return;
+
+    mFrequency = (double) frequency;
+
     float sampleRate = (float)mStream->getSampleRate();
 
     float A = powf(10.0f, dbGain / 40.0f);
@@ -58,7 +61,7 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
 
     float *outputData = static_cast<float *>(audioData);
     double sampleRate = audioStream->getSampleRate();
-    double phaseIncrement = (kFrequency * M_PI) / sampleRate;
+    double phaseIncrement = (mFrequency * 2.0 * M_PI) / (double)sampleRate;
 
     for (int i = 0; i < numFrames; ++i) {
         float sample = (float) (sin(mPhase) * kAmplitude);

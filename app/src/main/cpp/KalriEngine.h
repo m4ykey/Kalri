@@ -27,7 +27,7 @@ public:
 private:
     std::shared_ptr<oboe::AudioStream> mStream;
     double mPhase = 0.0;
-    const double kFrequency = 440.0;
+    double mFrequency = 440.0;
     const double kAmplitude = 0.2;
 
     float a0 = 1.0f, a1 = 0.0f, a2 = 0.0f, b1 = 0.0f, b2 = 0.0f;

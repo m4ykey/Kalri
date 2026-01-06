@@ -1,17 +1,18 @@
 package com.m4ykey.kalri
 
-import android.media.AudioDeviceCallback
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.m4ykey.kalri.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var audioManager : AudioManager
+    private lateinit var deviceManager: DeviceManager
+
+    private var isEngineRunning = false
+
+    private external fun toggleFilter(active : Boolean)
+    private external fun setFilterParams(frequency : Float, dbGain : Float)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,54 +20,45 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        deviceManager = DeviceManager(this) { message ->
+            showToast(this, message)
+        }
+        deviceManager.startListening()
 
-        checkAudioDevice()
+        setupUI()
+    }
 
-        audioManager.registerAudioDeviceCallback(object : AudioDeviceCallback() {
-            override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo?>?) {
-                checkAudioDevice()
+    private fun setupUI() {
+        binding.apply {
+            btnActivate.setOnClickListener {
+                isEngineRunning = !isEngineRunning
+                toggleFilter(isEngineRunning)
+
+                btnActivate.text = if (isEngineRunning) "STOP ENGINE" else "START ENGINE"
             }
 
-            override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo?>?) {
-                showToast(this@MainActivity, "Disconnected")
+            sliderFreq.addOnChangeListener { _, value, _ ->
+                if (isEngineRunning) {
+                    setFilterParams(value, sliderGain.value)
+                }
             }
-        }, null)
 
-        binding.sampleText.apply {
-            text = stringFromJNI()
-            setOnClickListener {
-                toggleFilter(true)
-                Log.d("KalriDebug", "Click detected: calling toggleFilter(true)")
+            sliderGain.addOnChangeListener { _, value, _ ->
+                if (isEngineRunning) {
+                    setFilterParams(sliderFreq.value, value)
+                }
             }
         }
     }
-    
-    external fun stringFromJNI(): String
 
-    external fun toggleFilter(active : Boolean)
+    override fun onDestroy() {
+        super.onDestroy()
+        deviceManager.stopListening()
+    }
 
     companion object {
         init {
             System.loadLibrary("kalri")
-        }
-    }
-    
-    private fun checkAudioDevice() {
-        val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-        for (device in devices) {
-            when (device.type) {
-                AudioDeviceInfo.TYPE_USB_DEVICE,
-                AudioDeviceInfo.TYPE_USB_HEADSET,
-                AudioDeviceInfo.TYPE_USB_ACCESSORY -> {
-                    showToast(this, "Detected: ${device.productName}")
-                }
-
-                AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
-                AudioDeviceInfo.TYPE_WIRED_HEADSET -> {
-                    showToast(this, "Detected Wired Headphones")
-                }
-            }
         }
     }
 }

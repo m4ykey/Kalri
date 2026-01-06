@@ -5,16 +5,6 @@
 bool isHighResEnabled = false;
 KalriEngine engine;
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_m4ykey_kalri_MainActivity_stringFromJNI(
-        JNIEnv* env,
-        jobject /* this */) {
-    std::string message = "Engine Kalri: Active";
-    if (isHighResEnabled) message += " [High-Res Type]";
-
-    return env->NewStringUTF(message.c_str());
-}
-
 extern "C" JNIEXPORT void JNICALL
 Java_com_m4ykey_kalri_MainActivity_toggleFilter(
         JNIEnv* env,
@@ -29,4 +19,15 @@ Java_com_m4ykey_kalri_MainActivity_toggleFilter(
     }
 
     LOGD("Filter state: %s | Engine attempt started", active ? "ON" : "OFF");
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_m4ykey_kalri_MainActivity_setFilterParams(
+        JNIEnv* env,
+        jobject /* this */,
+        jfloat frequency,
+        jfloat dbGain) {
+    engine.updateFilter(frequency, dbGain, 1.0f);
+
+    LOGD("Filter updated: Freq=%.1f, Gain=%.1f", frequency, dbGain);
 }

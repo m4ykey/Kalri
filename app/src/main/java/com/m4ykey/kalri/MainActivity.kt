@@ -4,6 +4,7 @@ import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.m4ykey.kalri.databinding.ActivityMainBinding
 
@@ -31,11 +32,19 @@ class MainActivity : AppCompatActivity() {
                 showToast(this@MainActivity, "Disconnected")
             }
         }, null)
-        
-        binding.sampleText.text = stringFromJNI()
+
+        binding.sampleText.apply {
+            text = stringFromJNI()
+            setOnClickListener {
+                toggleFilter(true)
+                Log.d("KalriDebug", "Click detected: calling toggleFilter(true)")
+            }
+        }
     }
     
     external fun stringFromJNI(): String
+
+    external fun toggleFilter(active : Boolean)
 
     companion object {
         init {

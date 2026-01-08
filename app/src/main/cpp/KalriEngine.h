@@ -51,6 +51,9 @@ private:
     int32_t mSamplesPerBeat = 24000;
     int32_t mClickSamplesLeft = 0;
     const int32_t kClickDuration = 400;
+
+    int mBeatCounter = 0;
+    int mMeasureLength = 4;
 };
 
 #endif

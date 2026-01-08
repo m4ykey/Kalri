@@ -77,7 +77,13 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         if (mSampleCount >= mSamplesPerBeat) {
             mSampleCount = 0;
             mClickSamplesLeft = kClickDuration;
+            mBeatCounter++;
         }
+
+        if (mBeatCounter > mMeasureLength) mBeatCounter = 1;
+
+        double currentFreq = (mBeatCounter == 1) ? mFrequency * 2.0 : mFrequency;
+        phaseIncrement = (currentFreq * 2.0 * M_PI) / sampleRate;
 
         a0 += (targetA0 - a0) * kSmoothingFactor;
         a1 += (targetA1 - a1) * kSmoothingFactor;
@@ -92,6 +98,9 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
             rawSample = sin(mPhase) * 0.5f;
             mPhase += phaseIncrement;
             mClickSamplesLeft--;
+
+            float amplitude = (float)mClickSamplesLeft / (float)kClickDuration;
+            rawSample = sin(mPhase) * 0.5f * amplitude;
         } else {
             mPhase = 0.0;
         }

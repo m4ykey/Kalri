@@ -17,3 +17,5 @@ local.properties
 *.a
 /obj/
 .idea/
+/keystore.properties
+.kotlin/sessions

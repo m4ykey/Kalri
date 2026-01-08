@@ -27,6 +27,12 @@ void KalriEngine::stop() {
     }
 }
 
+void KalriEngine::pushData(float *buffer, int sumSamples) {
+    mInternalBuffer.insert(mInternalBuffer.end(), buffer, buffer + sumSamples);
+    mInputBuffer = mInternalBuffer.data();
+    mCurrentBufferSize = sumSamples;
+}
+
 void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
     if (mStream == nullptr) return;
 
@@ -70,13 +76,27 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         b1 += (targetB1 - b1) * kSmoothingFactor;
         b2 += (targetB2 - b2) * kSmoothingFactor;
 
-        float rawSample = 0.0f;
+        float sampleR = 0.0f;
+        float sampleL = 0.0f;
 
-        outputData[i * 2] = stateL.process(rawSample, a0, a1, a2, b1, b2);
-        outputData[i * 2 + 1] = stateR.process(rawSample, a0, a1, a2, b1, b2);
+        if (mInputBuffer != nullptr && i * 2 + 1 < mCurrentBufferSize) {
+            sampleL = mInputBuffer[i * 2];
+            sampleR = mInputBuffer[i * 2 + 1];
+        } else {
+            sampleR = 0.0f;
+            sampleL = 0.0f;
+        }
 
-        mPhase += phaseIncrement;
-        if (mPhase >= M_PI * 2) mPhase -= M_PI * 2;
+        outputData[i * 2] = stateL.process(sampleL, a0, a1, a2, b1, b2);
+        outputData[i * 2 + 1] = stateR.process(sampleR, a0, a1, a2, b1, b2);
+    }
+
+    int samplesUsed = numFrames * 2;
+
+    if (mInternalBuffer.size() >= samplesUsed) {
+        mInternalBuffer.erase(mInternalBuffer.begin(), mInternalBuffer.begin() + samplesUsed);
+        mInputBuffer = mInternalBuffer.data();
+        mCurrentBufferSize = mInternalBuffer.size();
     }
 
     return oboe::DataCallbackResult::Continue;

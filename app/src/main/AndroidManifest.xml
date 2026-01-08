@@ -4,6 +4,7 @@
 
     <uses-feature android:name="android.hardware.usb.host"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"

@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private external fun toggleFilter(active : Boolean)
     private external fun setFilterParams(frequency : Float, dbGain : Float)
+    private external fun nativePushData(data : FloatArray, size : Int)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

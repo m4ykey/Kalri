@@ -31,3 +31,18 @@ Java_com_m4ykey_kalri_MainActivity_setFilterParams(
 
     LOGD("Filter updated: Freq=%.1f, Gain=%.1f", frequency, dbGain);
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_m4ykey_kalri_MainActivity_nativePushData(
+        JNIEnv* env,
+        jobject /* this */,
+        jfloatArray data,
+        jint size
+        ) {
+    jfloat* samples = env->GetFloatArrayElements(data, nullptr);
+
+    if (samples != nullptr) {
+        engine.pushData(samples, size);
+        env->ReleaseFloatArrayElements(data, samples, JNI_ABORT);
+    }
+}

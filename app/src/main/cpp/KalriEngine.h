@@ -4,6 +4,7 @@
 #include <oboe/Oboe.h>
 #include <android/log.h>
 #include <cmath>
+#include <vector>
 
 #define LOG_TAG "KalriEngine"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -25,6 +26,7 @@ public:
     void start();
     void stop();
     void updateFilter(float frequency, float dbGain, float Q);
+    void pushData(float* buffer, int sumSamples);
 
     oboe::DataCallbackResult onAudioReady(
             oboe::AudioStream *audioStream,
@@ -33,9 +35,7 @@ public:
 
 private:
     std::shared_ptr<oboe::AudioStream> mStream;
-    double mPhase = 0.0;
     double mFrequency = 440.0;
-    const double kAmplitude = 0.2;
 
     float a0 = 1.0f, a1 = 0.0f, a2 = 0.0f;
     float b1 = 0.0f, b2 = 0.0f;
@@ -45,6 +45,10 @@ private:
     float targetB1 = 0.0f, targetB2 = 0.0f;
 
     const float kSmoothingFactor = 0.005f;
+
+    float* mInputBuffer = nullptr;
+    int mCurrentBufferSize = 0;
+    std::vector<float> mInternalBuffer;
 };
 
 #endif

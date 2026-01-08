@@ -7,10 +7,11 @@ KalriEngine engine;
 extern "C" JNIEXPORT void JNICALL
 Java_com_m4ykey_kalri_MainActivity_toggleFilter(
         JNIEnv* env,
-        jobject /* this */,
+        jobject thiz,
         jboolean active) {
 
     if (active) {
+        engine.setMainActivityContext(env, env->NewGlobalRef(thiz));
         engine.start();
     } else {
         engine.stop();

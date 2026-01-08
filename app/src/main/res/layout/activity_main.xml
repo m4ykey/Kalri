@@ -83,5 +83,4 @@
         android:valueFrom="100.0"
         android:valueTo="10000.0"
         android:value="440.0"/>
-
 </LinearLayout>

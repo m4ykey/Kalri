@@ -1,6 +1,7 @@
 package com.m4ykey.kalri
 
 import android.os.Bundle
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.m4ykey.kalri.databinding.ActivityMainBinding
 
@@ -67,6 +68,14 @@ class MainActivity : AppCompatActivity() {
                     setFilterParams(sliderFreq.value, value)
                 }
             }
+        }
+    }
+
+    @Keep
+    fun triggerBeat() {
+        runOnUiThread {
+            binding.txtBpm.alpha = 0.5f
+            binding.txtBpm.animate().alpha(1.0f).setDuration(100).start()
         }
     }
 

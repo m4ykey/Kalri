@@ -34,6 +34,24 @@ void KalriEngine::stop() {
         mStream->requestStop();
         mStream->close();
     }
+
+    if (mObjectMainActivity && mJvm) {
+        JNIEnv* env;
+        if (mJvm->GetEnv((void**)&env, JNI_VERSION_1_6) == JNI_OK) {
+            env->DeleteGlobalRef(mObjectMainActivity);
+            mObjectMainActivity = nullptr;
+            mMethodUpdateVisual = nullptr;
+        }
+    }
+}
+
+void KalriEngine::setMainActivityContext(JNIEnv* env, jobject activityContext) {
+    mObjectMainActivity = env->NewGlobalRef(activityContext);
+
+    env->GetJavaVM(&mJvm);
+
+    jclass clz = env->GetObjectClass(mObjectMainActivity);
+    mMethodUpdateVisual = env->GetMethodID(clz, "triggerBeat", "()V");
 }
 
 void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
@@ -75,15 +93,24 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         mSampleCount++;
 
         if (mSampleCount >= mSamplesPerBeat) {
+            if (mJvm && mObjectMainActivity && mMethodUpdateVisual) {
+                JNIEnv* currentEnv;
+
+                if (mJvm->GetEnv((void**)&currentEnv, JNI_VERSION_1_6) == JNI_EDETACHED) {
+                    mJvm->AttachCurrentThread(&currentEnv, nullptr);
+                }
+
+                currentEnv->CallVoidMethod(mObjectMainActivity, mMethodUpdateVisual);
+            }
             mSampleCount = 0;
             mClickSamplesLeft = kClickDuration;
+
             mBeatCounter++;
+            if (mBeatCounter > mMeasureLength) mBeatCounter = 1;
+
+            double currentFreq = (mBeatCounter == 1) ? mFrequency * 2.0 : mFrequency;
+            phaseIncrement = (currentFreq * 2.0 * M_PI) / sampleRate;
         }
-
-        if (mBeatCounter > mMeasureLength) mBeatCounter = 1;
-
-        double currentFreq = (mBeatCounter == 1) ? mFrequency * 2.0 : mFrequency;
-        phaseIncrement = (currentFreq * 2.0 * M_PI) / sampleRate;
 
         a0 += (targetA0 - a0) * kSmoothingFactor;
         a1 += (targetA1 - a1) * kSmoothingFactor;
@@ -93,14 +120,12 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         b2 += (targetB2 - b2) * kSmoothingFactor;
 
         float rawSample = 0.0f;
-
         if (mClickSamplesLeft > 0) {
-            rawSample = sin(mPhase) * 0.5f;
-            mPhase += phaseIncrement;
-            mClickSamplesLeft--;
-
             float amplitude = (float)mClickSamplesLeft / (float)kClickDuration;
             rawSample = sin(mPhase) * 0.5f * amplitude;
+
+            mPhase += phaseIncrement;
+            mClickSamplesLeft--;
         } else {
             mPhase = 0.0;
         }

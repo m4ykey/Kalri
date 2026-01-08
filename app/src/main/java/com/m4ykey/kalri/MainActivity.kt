@@ -7,54 +7,67 @@ import com.m4ykey.kalri.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var deviceManager: DeviceManager
 
-    private var isEngineRunning = false
+    private var isMetronomeRunning = false
 
     private external fun toggleFilter(active : Boolean)
     private external fun setFilterParams(frequency : Float, dbGain : Float)
-    private external fun nativePushData(data : FloatArray, size : Int)
+    private external fun setBPM(bpm : Int)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        deviceManager = DeviceManager(this) { message ->
-            showToast(this, message)
-        }
-        deviceManager.startListening()
+
+        val initialBpm = binding.sliderBPM.value.toInt()
+        binding.txtBpm.text = "$initialBpm BPM"
 
         setupUI()
     }
 
     private fun setupUI() {
         binding.apply {
-            btnActivate.setOnClickListener {
-                isEngineRunning = !isEngineRunning
-                toggleFilter(isEngineRunning)
+            sliderBPM.addOnChangeListener { _, value, _ ->
+                val bpm = value.toInt()
+                txtBpm.text = "$bpm BPM"
+                setBPM(bpm)
+            }
 
-                btnActivate.text = if (isEngineRunning) "STOP ENGINE" else "START ENGINE"
+            btnAdd.setOnClickListener {
+                val newValue = sliderBPM.value + 1f
+                if (newValue <= sliderBPM.valueTo) sliderBPM.value = newValue
+            }
+
+            btnMinus.setOnClickListener {
+                val newValue = sliderBPM.value - 1f
+                if (newValue >= sliderBPM.valueFrom) sliderBPM.value = newValue
+            }
+
+            btnStart.setOnClickListener {
+                isMetronomeRunning = !isMetronomeRunning
+                toggleFilter(isMetronomeRunning)
+
+                if (isMetronomeRunning) {
+                    setBPM(sliderBPM.value.toInt())
+                    setFilterParams(sliderFreq.value, sliderGain.value)
+                }
+
+                btnStart.text = if (isMetronomeRunning) "Stop" else "Start"
             }
 
             sliderFreq.addOnChangeListener { _, value, _ ->
-                if (isEngineRunning) {
+                if (isMetronomeRunning) {
                     setFilterParams(value, sliderGain.value)
                 }
             }
 
             sliderGain.addOnChangeListener { _, value, _ ->
-                if (isEngineRunning) {
+                if (isMetronomeRunning) {
                     setFilterParams(sliderFreq.value, value)
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        deviceManager.stopListening()
     }
 
     companion object {

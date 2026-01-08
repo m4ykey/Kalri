@@ -12,6 +12,9 @@ void KalriEngine::start() {
     ->setDataCallback(this)
     ->openStream(mStream);
 
+    mSampleCount = mSamplesPerBeat;
+    mClickSamplesLeft = 0;
+
     if (mStream) {
         updateFilter(440.0f, 15.0f, 5.0f);
 
@@ -20,17 +23,17 @@ void KalriEngine::start() {
     }
 }
 
+void KalriEngine::setBPM(int bpm) {
+    auto sampleRate = (float)mStream->getSampleRate();
+
+    mSamplesPerBeat = (sampleRate * 60.0f) / bpm;
+}
+
 void KalriEngine::stop() {
     if (mStream) {
         mStream->requestStop();
         mStream->close();
     }
-}
-
-void KalriEngine::pushData(float *buffer, int sumSamples) {
-    mInternalBuffer.insert(mInternalBuffer.end(), buffer, buffer + sumSamples);
-    mInputBuffer = mInternalBuffer.data();
-    mCurrentBufferSize = sumSamples;
 }
 
 void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
@@ -69,6 +72,13 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
     double phaseIncrement = (mFrequency * 2.0 * M_PI) / (double)sampleRate;
 
     for (int i = 0; i < numFrames; ++i) {
+        mSampleCount++;
+
+        if (mSampleCount >= mSamplesPerBeat) {
+            mSampleCount = 0;
+            mClickSamplesLeft = kClickDuration;
+        }
+
         a0 += (targetA0 - a0) * kSmoothingFactor;
         a1 += (targetA1 - a1) * kSmoothingFactor;
         a2 += (targetA2 - a2) * kSmoothingFactor;
@@ -76,27 +86,21 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         b1 += (targetB1 - b1) * kSmoothingFactor;
         b2 += (targetB2 - b2) * kSmoothingFactor;
 
-        float sampleR = 0.0f;
-        float sampleL = 0.0f;
+        float rawSample = 0.0f;
 
-        if (mInputBuffer != nullptr && i * 2 + 1 < mCurrentBufferSize) {
-            sampleL = mInputBuffer[i * 2];
-            sampleR = mInputBuffer[i * 2 + 1];
+        if (mClickSamplesLeft > 0) {
+            rawSample = sin(mPhase) * 0.5f;
+            mPhase += phaseIncrement;
+            mClickSamplesLeft--;
         } else {
-            sampleR = 0.0f;
-            sampleL = 0.0f;
+            mPhase = 0.0;
         }
+
+        float sampleR = rawSample;
+        float sampleL = rawSample;
 
         outputData[i * 2] = stateL.process(sampleL, a0, a1, a2, b1, b2);
         outputData[i * 2 + 1] = stateR.process(sampleR, a0, a1, a2, b1, b2);
-    }
-
-    int samplesUsed = numFrames * 2;
-
-    if (mInternalBuffer.size() >= samplesUsed) {
-        mInternalBuffer.erase(mInternalBuffer.begin(), mInternalBuffer.begin() + samplesUsed);
-        mInputBuffer = mInternalBuffer.data();
-        mCurrentBufferSize = mInternalBuffer.size();
     }
 
     return oboe::DataCallbackResult::Continue;

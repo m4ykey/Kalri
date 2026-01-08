@@ -26,7 +26,7 @@ public:
     void start();
     void stop();
     void updateFilter(float frequency, float dbGain, float Q);
-    void pushData(float* buffer, int sumSamples);
+    void setBPM(int bpm);
 
     oboe::DataCallbackResult onAudioReady(
             oboe::AudioStream *audioStream,
@@ -36,6 +36,7 @@ public:
 private:
     std::shared_ptr<oboe::AudioStream> mStream;
     double mFrequency = 440.0;
+    double mPhase = 0.0;
 
     float a0 = 1.0f, a1 = 0.0f, a2 = 0.0f;
     float b1 = 0.0f, b2 = 0.0f;
@@ -46,9 +47,10 @@ private:
 
     const float kSmoothingFactor = 0.005f;
 
-    float* mInputBuffer = nullptr;
-    int mCurrentBufferSize = 0;
-    std::vector<float> mInternalBuffer;
+    int32_t mSampleCount = 0;
+    int32_t mSamplesPerBeat = 24000;
+    int32_t mClickSamplesLeft = 0;
+    const int32_t kClickDuration = 400;
 };
 
 #endif

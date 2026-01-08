@@ -2,7 +2,6 @@
 #include <string>
 #include "KalriEngine.h"
 
-bool isHighResEnabled = false;
 KalriEngine engine;
 
 extern "C" JNIEXPORT void JNICALL
@@ -10,7 +9,6 @@ Java_com_m4ykey_kalri_MainActivity_toggleFilter(
         JNIEnv* env,
         jobject /* this */,
         jboolean active) {
-    isHighResEnabled = active;
 
     if (active) {
         engine.start();
@@ -33,16 +31,9 @@ Java_com_m4ykey_kalri_MainActivity_setFilterParams(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_m4ykey_kalri_MainActivity_nativePushData(
+Java_com_m4ykey_kalri_MainActivity_setBPM(
         JNIEnv* env,
         jobject /* this */,
-        jfloatArray data,
-        jint size
-        ) {
-    jfloat* samples = env->GetFloatArrayElements(data, nullptr);
-
-    if (samples != nullptr) {
-        engine.pushData(samples, size);
-        env->ReleaseFloatArrayElements(data, samples, JNI_ABORT);
-    }
+        jint bpm) {
+     engine.setBPM(bpm);
 }

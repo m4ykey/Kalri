@@ -24,7 +24,13 @@ void KalriEngine::start() {
 }
 
 void KalriEngine::setBPM(int bpm) {
-    auto sampleRate = (float)mStream->getSampleRate();
+    float sampleRate = 48000.0f;
+
+    if (mStream != nullptr) {
+        sampleRate = (float)mStream->getSampleRate();
+    } else {
+
+    }
 
     mSamplesPerBeat = (sampleRate * 60.0f) / bpm;
 }

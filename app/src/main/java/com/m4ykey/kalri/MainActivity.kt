@@ -4,16 +4,17 @@ import android.os.Bundle
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.m4ykey.kalri.databinding.ActivityMainBinding
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private var isMetronomeRunning = false
-
-    private external fun toggleFilter(active : Boolean)
-    private external fun setFilterParams(frequency : Float, dbGain : Float)
-    private external fun setBPM(bpm : Int)
+    private val viewModel : MetronomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,52 +22,53 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val initialBpm = binding.sliderBPM.value.toInt()
-        binding.txtBpm.text = "$initialBpm BPM"
-
         setupUI()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.bpm.collect { bpm ->
+                        binding.txtBpm.text = "$bpm BPM"
+                    }
+                }
+
+                launch {
+                    viewModel.isRunning.collect { isRunning ->
+                        binding.btnStart.text = if (isRunning) "Stop" else "Start"
+                    }
+                }
+            }
+        }
     }
 
     private fun setupUI() {
         binding.apply {
             sliderBPM.addOnChangeListener { _, value, _ ->
-                val bpm = value.toInt()
-                txtBpm.text = "$bpm BPM"
-                setBPM(bpm)
+                viewModel.setBpm(value.toInt())
             }
 
             btnAdd.setOnClickListener {
-                val newValue = sliderBPM.value + 1f
-                if (newValue <= sliderBPM.valueTo) sliderBPM.value = newValue
+                viewModel.setBpm(viewModel.bpm.value + 1)
             }
 
             btnMinus.setOnClickListener {
-                val newValue = sliderBPM.value - 1f
-                if (newValue >= sliderBPM.valueFrom) sliderBPM.value = newValue
+                viewModel.setBpm(viewModel.bpm.value - 1)
             }
 
             btnStart.setOnClickListener {
-                isMetronomeRunning = !isMetronomeRunning
-                toggleFilter(isMetronomeRunning)
-
-                if (isMetronomeRunning) {
-                    setBPM(sliderBPM.value.toInt())
-                    setFilterParams(sliderFreq.value, sliderGain.value)
+                if (viewModel.isRunning.value) {
+                    viewModel.stop()
+                } else {
+                    viewModel.start()
                 }
-
-                btnStart.text = if (isMetronomeRunning) "Stop" else "Start"
             }
 
             sliderFreq.addOnChangeListener { _, value, _ ->
-                if (isMetronomeRunning) {
-                    setFilterParams(value, sliderGain.value)
-                }
+                viewModel.setFilterParams(value, sliderGain.value)
             }
 
             sliderGain.addOnChangeListener { _, value, _ ->
-                if (isMetronomeRunning) {
-                    setFilterParams(sliderFreq.value, value)
-                }
+                viewModel.setFilterParams(sliderFreq.value, value)
             }
         }
     }

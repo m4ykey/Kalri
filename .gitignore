@@ -19,3 +19,4 @@ local.properties
 .idea/
 /keystore.properties
 .kotlin/sessions
+/app/release/

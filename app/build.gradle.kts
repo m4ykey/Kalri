@@ -14,7 +14,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.m4ykey.kalri"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     signingConfigs {
@@ -30,7 +30,7 @@ android {
     defaultConfig {
         applicationId = "com.m4ykey.kalri"
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 101
         versionName = "1.0.1"
 

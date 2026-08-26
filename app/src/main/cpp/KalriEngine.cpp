@@ -1,5 +1,7 @@
 #include "KalriEngine.h"
 
+#include <utility>
+
 void KalriEngine::start() {
     oboe::AudioStreamBuilder builder;
     builder.setDeviceId(oboe::Unspecified)
@@ -40,24 +42,10 @@ void KalriEngine::stop() {
         mStream->requestStop();
         mStream->close();
     }
-
-    if (mObjectMainActivity && mJvm) {
-        JNIEnv* env;
-        if (mJvm->GetEnv((void**)&env, JNI_VERSION_1_6) == JNI_OK) {
-            env->DeleteGlobalRef(mObjectMainActivity);
-            mObjectMainActivity = nullptr;
-            mMethodUpdateVisual = nullptr;
-        }
-    }
 }
 
-void KalriEngine::setMainActivityContext(JNIEnv* env, jobject activityContext) {
-    mObjectMainActivity = env->NewGlobalRef(activityContext);
-
-    env->GetJavaVM(&mJvm);
-
-    jclass clz = env->GetObjectClass(mObjectMainActivity);
-    mMethodUpdateVisual = env->GetMethodID(clz, "triggerBeat", "()V");
+void KalriEngine::setBeatCallback(std::function<void()> callback) {
+    mBeatCallback = std::move(callback);
 }
 
 void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
@@ -99,15 +87,10 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
         mSampleCount++;
 
         if (mSampleCount >= mSamplesPerBeat) {
-            if (mJvm && mObjectMainActivity && mMethodUpdateVisual) {
-                JNIEnv* currentEnv;
-
-                if (mJvm->GetEnv((void**)&currentEnv, JNI_VERSION_1_6) == JNI_EDETACHED) {
-                    mJvm->AttachCurrentThread(&currentEnv, nullptr);
-                }
-
-                currentEnv->CallVoidMethod(mObjectMainActivity, mMethodUpdateVisual);
+            if (mBeatCallback) {
+                mBeatCallback();
             }
+
             mSampleCount = 0;
             mClickSamplesLeft = kClickDuration;
 

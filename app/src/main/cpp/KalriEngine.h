@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 #include <jni.h>
+#include <functional>
 
 #define LOG_TAG "KalriEngine"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -28,7 +29,7 @@ public:
     void stop();
     void updateFilter(float frequency, float dbGain, float Q);
     void setBPM(int bpm);
-    void setMainActivityContext(JNIEnv* env, jobject activityContext);
+    void setBeatCallback(std::function<void()> callback);
 
     oboe::DataCallbackResult onAudioReady(
             oboe::AudioStream *audioStream,
@@ -57,9 +58,7 @@ private:
     int mBeatCounter = 0;
     int mMeasureLength = 4;
 
-    jobject mObjectMainActivity = nullptr;
-    jmethodID mMethodUpdateVisual = nullptr;
-    JavaVM* mJvm = nullptr;
+    std::function<void()> mBeatCallback;
 };
 
 #endif

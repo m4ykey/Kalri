@@ -16,6 +16,7 @@ void KalriEngine::start() {
 
     mSampleCount = mSamplesPerBeat;
     mClickSamplesLeft = 0;
+    mBeatCounter = 0;
 
     if (mStream) {
         mPhaseIncrement = (mFrequency * 2.0 * M_PI) / mStream->getSampleRate();
@@ -31,8 +32,6 @@ void KalriEngine::setBPM(int bpm) {
 
     if (mStream != nullptr) {
         sampleRate = (float)mStream->getSampleRate();
-    } else {
-
     }
 
     mSamplesPerBeat = (sampleRate * 60.0) / bpm;

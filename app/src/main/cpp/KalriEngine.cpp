@@ -18,10 +18,11 @@ void KalriEngine::start() {
     mClickSamplesLeft = 0;
 
     if (mStream) {
+        mPhaseIncrement = (mFrequency * 2.0 * M_PI) / mStream->getSampleRate();
+
         updateFilter(440.0f, 15.0f, 5.0f);
 
         mStream->requestStart();
-        LOGD("Audio Stream started successfully");
     }
 }
 
@@ -34,7 +35,7 @@ void KalriEngine::setBPM(int bpm) {
 
     }
 
-    mSamplesPerBeat = (sampleRate * 60.0f) / bpm;
+    mSamplesPerBeat = (sampleRate * 60.0) / bpm;
 }
 
 void KalriEngine::stop() {
@@ -42,10 +43,6 @@ void KalriEngine::stop() {
         mStream->requestStop();
         mStream->close();
     }
-}
-
-void KalriEngine::setBeatCallback(std::function<void()> callback) {
-    mBeatCallback = std::move(callback);
 }
 
 void KalriEngine::updateFilter(float frequency, float dbGain, float Q) {
@@ -81,24 +78,24 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
 
     auto *outputData = static_cast<float *>(audioData);
     double sampleRate = audioStream->getSampleRate();
-    double phaseIncrement = (mFrequency * 2.0 * M_PI) / (double)sampleRate;
 
     for (int i = 0; i < numFrames; ++i) {
-        mSampleCount++;
+        mSampleCount += 1.0;
 
         if (mSampleCount >= mSamplesPerBeat) {
-            if (mBeatCallback) {
-                mBeatCallback();
-            }
+            mSampleCount -= mSamplesPerBeat;
 
-            mSampleCount = 0;
             mClickSamplesLeft = kClickDuration;
+            mPhase = 0.0;
 
             mBeatCounter++;
-            if (mBeatCounter > mMeasureLength) mBeatCounter = 1;
+
+            if (mBeatCounter > mMeasureLength) {
+                mBeatCounter = 1;
+            }
 
             double currentFreq = (mBeatCounter == 1) ? mFrequency * 2.0 : mFrequency;
-            phaseIncrement = (currentFreq * 2.0 * M_PI) / sampleRate;
+            mPhaseIncrement = (currentFreq * 2.0 * M_PI) / sampleRate;
         }
 
         a0 += (targetA0 - a0) * kSmoothingFactor;
@@ -110,10 +107,10 @@ oboe::DataCallbackResult KalriEngine::onAudioReady(
 
         float rawSample = 0.0f;
         if (mClickSamplesLeft > 0) {
-            float amplitude = (float)mClickSamplesLeft / (float)kClickDuration;
-            rawSample = sin(mPhase) * 0.5f * amplitude;
+            float amplitude = static_cast<float>(mClickSamplesLeft) / static_cast<float>(kClickDuration);
+            rawSample = static_cast<float>(sin(mPhase) * 0.5 * amplitude);
 
-            mPhase += phaseIncrement;
+            mPhase += mPhaseIncrement;
             mClickSamplesLeft--;
         } else {
             mPhase = 0.0;

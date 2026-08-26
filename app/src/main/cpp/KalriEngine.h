@@ -6,7 +6,6 @@
 #include <cmath>
 #include <vector>
 #include <jni.h>
-#include <functional>
 
 #define LOG_TAG "KalriEngine"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -29,7 +28,6 @@ public:
     void stop();
     void updateFilter(float frequency, float dbGain, float Q);
     void setBPM(int bpm);
-    void setBeatCallback(std::function<void()> callback);
 
     oboe::DataCallbackResult onAudioReady(
             oboe::AudioStream *audioStream,
@@ -40,6 +38,7 @@ private:
     std::shared_ptr<oboe::AudioStream> mStream;
     double mFrequency = 440.0;
     double mPhase = 0.0;
+    double mPhaseIncrement = 0.0;
 
     float a0 = 1.0f, a1 = 0.0f, a2 = 0.0f;
     float b1 = 0.0f, b2 = 0.0f;
@@ -50,15 +49,13 @@ private:
 
     const float kSmoothingFactor = 0.005f;
 
-    int32_t mSampleCount = 0;
-    int32_t mSamplesPerBeat = 24000;
+    double mSampleCount = 0.0;
+    double mSamplesPerBeat = 24000.0;
     int32_t mClickSamplesLeft = 0;
     const int32_t kClickDuration = 400;
 
     int mBeatCounter = 0;
     int mMeasureLength = 4;
-
-    std::function<void()> mBeatCallback;
 };
 
 #endif

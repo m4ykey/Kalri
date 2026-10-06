@@ -1,85 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:gravity="center_horizontal"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/txtBpm"
-        android:textSize="40sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0 BPM"/>
-
-    <com.google.android.material.slider.Slider
-        android:id="@+id/sliderBPM"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:valueFrom="1.0"
-        android:valueTo="300.0"
-        android:layout_marginBottom="16dp"
-        android:value="40.0"/>
-
     <LinearLayout
-        android:layout_marginBottom="40dp"
-        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:inputType="number"
+                android:background="@null"
+                android:backgroundTint="@null"
+                android:id="@+id/txtBpm"
+                android:textSize="40sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"/>
+
+            <TextView
+                android:layout_marginStart="10dp"
+                android:text="BPM"
+                android:textSize="40sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderBPM"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="1.0"
+            android:valueTo="300.0"
+            android:layout_marginBottom="16dp"
+            android:value="40.0"/>
+
+        <LinearLayout
+            android:layout_marginBottom="40dp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdd"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="+"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMinus"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="-"/>
+
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAdd"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="+"/>
+            style="@style/ThemeOverlay.Material3.Button.TonalButton"
+            android:text="Start"
+            android:id="@+id/btnStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnMinus"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <LinearLayout
+            android:layout_gravity="start"
+            android:layout_marginTop="50dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="-"/>
+            android:orientation="horizontal">
+
+            <TextView
+                android:text="Show filters"
+                android:layout_marginEnd="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutFilters"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Filter Gain (dB)"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderGain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="-30.0"
+                android:valueTo="15.0"
+                android:value="0.0"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Frequency (Hz)"/>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderFreq"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="100.0"
+                android:valueTo="10000.0"
+                android:value="440.0"/>
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewBpms"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        style="@style/ThemeOverlay.Material3.Button.TonalButton"
-        android:text="Start"
-        android:id="@+id/btnStart"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/fabAdd"
+        android:contentDescription="Add"
+        android:src="@drawable/ic_add"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <TextView
-        android:layout_marginTop="50dp"
-        android:text="Filter Gain (dB)"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <com.google.android.material.slider.Slider
-        android:id="@+id/sliderGain"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:valueFrom="-30.0"
-        android:valueTo="15.0"
-        android:value="0.0"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Frequency (Hz)"/>
-
-    <com.google.android.material.slider.Slider
-        android:id="@+id/sliderFreq"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:valueFrom="100.0"
-        android:valueTo="10000.0"
-        android:value="440.0"/>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

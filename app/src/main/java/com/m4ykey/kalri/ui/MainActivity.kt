@@ -6,8 +6,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.m4ykey.kalri.metronome.MetronomeViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.m4ykey.kalri.R
 import com.m4ykey.kalri.databinding.ActivityMainBinding
+import com.m4ykey.kalri.databinding.LayoutAddItemDialogBinding
+import com.m4ykey.kalri.metronome.MetronomeViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -70,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.apply {
-            fabAdd.setOnClickListener {  }
+            fabAdd.setOnClickListener { displayDialog() }
 
             sliderBPM.addOnChangeListener { _, value, _ ->
                 viewModel.setBpm(value.toInt())
@@ -104,6 +107,30 @@ class MainActivity : AppCompatActivity() {
                 viewModel.setSwitched(isChecked)
             }
         }
+    }
+
+    private fun displayDialog() {
+        val dialogBinding = LayoutAddItemDialogBinding.inflate(layoutInflater)
+
+        MaterialAlertDialogBuilder(this@MainActivity)
+            .setTitle(R.string.add_item)
+            .setPositiveButton(R.string.save) { dialog, _ ->
+                val bpm = dialogBinding.etBpm.text.toString().toIntOrNull()
+                val name = dialogBinding.etName.text.toString()
+
+                if (bpm == null || bpm !in 1..300) {
+                    return@setPositiveButton
+                }
+
+                if (name.isBlank()) {
+                    return@setPositiveButton
+                }
+
+                dialog.dismiss()
+            }
+            .setView(dialogBinding.root)
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     companion object {

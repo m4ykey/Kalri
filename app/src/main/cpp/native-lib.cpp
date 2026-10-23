@@ -5,7 +5,7 @@
 KalriEngine engine;
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_m4ykey_kalri_MetronomeController_nativeToggleFilter(
+Java_com_m4ykey_kalri_metronome_MetronomeController_nativeToggleFilter(
         JNIEnv* env,
         jobject thiz,
         jboolean active) {
@@ -18,7 +18,7 @@ Java_com_m4ykey_kalri_MetronomeController_nativeToggleFilter(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_m4ykey_kalri_MetronomeController_nativeSetFilterParams(
+Java_com_m4ykey_kalri_metronome_MetronomeController_nativeSetFilterParams(
         JNIEnv* env,
         jobject /* this */,
         jfloat frequency,
@@ -27,7 +27,7 @@ Java_com_m4ykey_kalri_MetronomeController_nativeSetFilterParams(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_m4ykey_kalri_MetronomeController_nativeSetBpm(
+Java_com_m4ykey_kalri_metronome_MetronomeController_nativeSetBpm(
         JNIEnv* env,
         jobject /* this */,
         jint bpm) {

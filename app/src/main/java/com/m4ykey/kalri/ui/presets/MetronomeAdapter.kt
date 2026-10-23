@@ -2,10 +2,15 @@ package com.m4ykey.kalri.ui.presets
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.m4ykey.kalri.R
+import com.m4ykey.kalri.data.local.MetronomeEntity
 
-class MetronomeAdapter(private val items : List<MetronomeItem>) : RecyclerView.Adapter<MetronomeViewHolder>() {
+class MetronomeAdapter(
+    private val onItemClick : (MetronomeEntity) -> Unit,
+    private val onDeleteClick : (MetronomeEntity) -> Unit
+) : ListAdapter<MetronomeEntity, MetronomeViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -19,13 +24,32 @@ class MetronomeAdapter(private val items : List<MetronomeItem>) : RecyclerView.A
         holder: MetronomeViewHolder,
         position: Int
     ) {
-        val item = items[position]
+        val item = getItem(position)
 
-        holder.txtBpm.text = item.bpm.toString()
+        holder.txtBpm.text = "${item.bpm} BPM"
         holder.txtName.text = item.name
+
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
+        }
     }
 
-    override fun getItemCount(): Int {
-        return items.size
+    private companion object {
+        val DiffCallback = object : DiffUtil.ItemCallback<MetronomeEntity>() {
+            override fun areItemsTheSame(
+                oldItem: MetronomeEntity,
+                newItem: MetronomeEntity
+            ): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(
+                oldItem: MetronomeEntity,
+                newItem: MetronomeEntity
+            ): Boolean {
+                return oldItem == newItem
+            }
+
+        }
     }
 }

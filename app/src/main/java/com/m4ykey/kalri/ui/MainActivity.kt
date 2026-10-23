@@ -6,11 +6,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.m4ykey.kalri.R
 import com.m4ykey.kalri.databinding.ActivityMainBinding
 import com.m4ykey.kalri.databinding.LayoutAddItemDialogBinding
 import com.m4ykey.kalri.metronome.MetronomeViewModel
+import com.m4ykey.kalri.ui.presets.MetronomeAdapter
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -20,6 +22,17 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel : MetronomeViewModel by viewModel()
 
+    private val metronomeAdapter by lazy {
+        MetronomeAdapter(
+            onItemClick = { item ->
+                viewModel.setBpm(item.bpm)
+            },
+            onDeleteClick = { item ->
+                viewModel.deletePreset(item)
+            }
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -27,12 +40,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupUI()
+        setupViewModel()
+    }
 
+    private fun setupViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.bpm.collect { bpm ->
                         binding.txtBpm.text = bpm.toString()
+
+                        if (binding.sliderBPM.value != bpm.toFloat()) {
+                            binding.sliderBPM.value = bpm.toFloat()
+                        }
                     }
                 }
 
@@ -67,12 +87,23 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+
+                launch {
+                    viewModel.presets.collect { presets ->
+                        metronomeAdapter.submitList(presets)
+                    }
+                }
             }
         }
     }
 
     private fun setupUI() {
         binding.apply {
+            recyclerViewBpms.apply {
+                adapter = metronomeAdapter
+                layoutManager = LinearLayoutManager(this@MainActivity)
+            }
+
             fabAdd.setOnClickListener { displayDialog() }
 
             sliderBPM.addOnChangeListener { _, value, _ ->
@@ -118,15 +149,18 @@ class MainActivity : AppCompatActivity() {
                 val bpm = dialogBinding.etBpm.text.toString().toIntOrNull()
                 val name = dialogBinding.etName.text.toString()
 
-                if (bpm == null || bpm !in 1..300) {
-                    return@setPositiveButton
+                when {
+                    bpm == null || bpm !in 1..300 -> {
+                        dialogBinding.etBpm.error = getString(R.string.invalid_bpm)
+                    }
+                    name.isBlank() -> {
+                        dialogBinding.etName.error = getString(R.string.name_required)
+                    }
+                    else -> {
+                        viewModel.addPreset(name = name, bpm = bpm)
+                        dialog.dismiss()
+                    }
                 }
-
-                if (name.isBlank()) {
-                    return@setPositiveButton
-                }
-
-                dialog.dismiss()
             }
             .setView(dialogBinding.root)
             .setNegativeButton(R.string.cancel, null)

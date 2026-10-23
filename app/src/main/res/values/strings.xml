@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Kalri</string>
+    <string name="bpm">BPM</string>
+    <string name="start">Start</string>
+    <string name="add">Add</string>
+    <string name="frequency_hz">Frequency (Hz)</string>
+    <string name="filter_gain_db">Filter Gain (dB)</string>
+    <string name="show_filters">Show filters</string>
 </resources>

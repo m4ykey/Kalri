@@ -1,4 +1,4 @@
-package com.m4ykey.kalri
+package com.m4ykey.kalri.data.preferences
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException

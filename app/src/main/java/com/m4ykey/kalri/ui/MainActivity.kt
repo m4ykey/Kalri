@@ -1,4 +1,4 @@
-package com.m4ykey.kalri
+package com.m4ykey.kalri.ui
 
 import android.os.Bundle
 import android.view.View
@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.m4ykey.kalri.metronome.MetronomeViewModel
 import com.m4ykey.kalri.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.bpm.collect { bpm ->
-                        binding.txtBpm.setText(bpm.toString())
+                        binding.txtBpm.text = bpm.toString()
                     }
                 }
 
@@ -45,6 +46,22 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         binding.linearLayoutFilters.visibility = if (isSwitched) View.VISIBLE else View.GONE
+                    }
+                }
+
+                launch {
+                    viewModel.frequency.collect { freq ->
+                        if (binding.sliderFreq.value != freq) {
+                            binding.sliderFreq.value = freq
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.gain.collect { gain ->
+                        if (binding.sliderGain.value != gain) {
+                            binding.sliderGain.value = gain
+                        }
                     }
                 }
             }

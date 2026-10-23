@@ -1,4 +1,4 @@
-package com.m4ykey.kalri
+package com.m4ykey.kalri.metronome
 
 class MetronomeController {
 

@@ -1,7 +1,8 @@
-package com.m4ykey.kalri
+package com.m4ykey.kalri.metronome
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.m4ykey.kalri.data.preferences.MetronomePreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch

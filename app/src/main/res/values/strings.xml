@@ -6,4 +6,9 @@
     <string name="frequency_hz">Frequency (Hz)</string>
     <string name="filter_gain_db">Filter Gain (dB)</string>
     <string name="show_filters">Show filters</string>
+    <string name="add_item">Add item</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="invalid_bpm">Enter a BPM between 1 and 300</string>
+    <string name="name_required">Enter a name</string>
 </resources>

@@ -3,6 +3,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -85,6 +86,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.datastore)
+    implementation(libs.androidx.room3.runtime)
+    implementation(libs.androidx.sqlite.framework)
+    ksp(libs.androidx.room3.compiler)
 
     implementation(libs.koin.core)
     implementation(libs.koin.android)

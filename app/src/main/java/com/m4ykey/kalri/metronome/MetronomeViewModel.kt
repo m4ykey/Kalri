@@ -2,13 +2,19 @@ package com.m4ykey.kalri.metronome
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.m4ykey.kalri.data.local.MetronomeEntity
 import com.m4ykey.kalri.data.preferences.MetronomePreferences
+import com.m4ykey.kalri.data.repository.MetronomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MetronomeViewModel(
-    private val pref : MetronomePreferences
+    private val pref : MetronomePreferences,
+    private val repository : MetronomeRepository
 ) : ViewModel() {
 
     private val controller = MetronomeController()
@@ -27,6 +33,14 @@ class MetronomeViewModel(
 
     private val _gain = MutableStateFlow(0f)
     val gain = _gain.asStateFlow()
+
+    val presets : StateFlow<List<MetronomeEntity>> =
+        repository.getAll()
+            .stateIn(
+                scope = viewModelScope,
+                initialValue = emptyList(),
+                started = SharingStarted.WhileSubscribed(5_000)
+            )
 
     init {
         viewModelScope.launch {
@@ -64,6 +78,25 @@ class MetronomeViewModel(
     fun setBpm(bpm : Int) {
         controller.setBpm(bpm)
         _bpm.value = bpm
+    }
+
+    fun addPreset(name : String, bpm : Int) {
+        if (name.isBlank() || bpm !in 1..300) return
+
+        viewModelScope.launch {
+            repository.insert(
+                MetronomeEntity(
+                    name = name.trim(),
+                    bpm = bpm
+                )
+            )
+        }
+    }
+
+    fun deletePreset(item : MetronomeEntity) {
+        viewModelScope.launch {
+            repository.delete(item)
+        }
     }
 
 }

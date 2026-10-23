@@ -8,10 +8,18 @@
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <item name="android:statusBarColor">?android:attr/windowBackground</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">false</item>
 
         <item name="colorSurface">@color/black</item>
         <item name="colorOnSurface">#E1E1E1</item>
+
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Kalri.MaterialAlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.Kalri.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorSurface">@color/black</item>
+        <item name="colorOnSurface">#e1e1e1</item>
     </style>
 </resources>

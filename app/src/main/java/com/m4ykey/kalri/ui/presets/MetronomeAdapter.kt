@@ -8,8 +8,7 @@ import com.m4ykey.kalri.R
 import com.m4ykey.kalri.data.local.MetronomeEntity
 
 class MetronomeAdapter(
-    private val onItemClick : (MetronomeEntity) -> Unit,
-    private val onDeleteClick : (MetronomeEntity) -> Unit
+    private val onItemClick : (MetronomeEntity) -> Unit
 ) : ListAdapter<MetronomeEntity, MetronomeViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(

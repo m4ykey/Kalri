@@ -1,4 +1,4 @@
-package com.m4ykey.kalri.metronome
+package com.m4ykey.kalri.ui.presets
 
 data class MetronomeItem(
     val id : Int = 0,
